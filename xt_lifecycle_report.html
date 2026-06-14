@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XT平台 - 用户全生命周期阶梯奖励与ROI分析报表</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --card-bg: #111827;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent: #3b82f6;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --cyan: #06b6d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  h1 {
+    font-size: 28px; font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+
+  /* Top Stats Row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .stat-card:nth-child(1)::before { background: var(--accent); }
+  .stat-card:nth-child(2)::before { background: var(--green); }
+  .stat-card:nth-child(3)::before { background: var(--purple); }
+  .stat-card:nth-child(4)::before { background: var(--orange); }
+  .stat-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .stat-value { font-size: 28px; font-weight: 700; }
+  .stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Section */
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 20px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* Cards Grid */
+  .cards-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h3 { font-size: 15px; margin-bottom: 12px; color: var(--text); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .badge-green { background: rgba(16,185,129,0.2); color: #34d399; }
+  .badge-orange { background: rgba(245,158,11,0.2); color: #fbbf24; }
+  .badge-purple { background: rgba(139,92,246,0.2); color: #a78bfa; }
+  .badge-red { background: rgba(239,68,68,0.2); color: #f87171; }
+  .badge-cyan { background: rgba(6,182,212,0.2); color: #22d3ee; }
+
+  .roi-positive { color: var(--green); font-weight: 700; }
+  .roi-super { color: #34d399; font-weight: 700; font-size: 16px; }
+  .text-muted { color: var(--text-secondary); }
+  .text-sm { font-size: 12px; }
+
+  /* Chart containers */
+  .chart-box {
+    position: relative;
+    width: 100%;
+    height: 320px;
+  }
+  .chart-box-lg {
+    position: relative;
+    width: 100%;
+    height: 400px;
+  }
+
+  /* Lifecycle Flow */
+  .lifecycle-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .lifecycle-step {
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    position: relative;
+  }
+  .lifecycle-step .icon {
+    font-size: 28px; margin-bottom: 8px;
+  }
+  .lifecycle-step .name {
+    font-weight: 600; font-size: 14px; margin-bottom: 4px;
+  }
+  .lifecycle-step .desc {
+    font-size: 11px; color: var(--text-secondary);
+  }
+  .lifecycle-arrow {
+    font-size: 20px; color: var(--accent); flex-shrink: 0;
+  }
+
+  /* Notes */
+  .note {
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 16px;
+  }
+  .note strong { color: var(--text); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stats-row, .cards-2, .cards-3 { grid-template-columns: 1fr; }
+    .lifecycle-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <h1>XT平台 · 用户全生命周期阶梯奖励与ROI分析</h1>
+  <p class="subtitle">基于成长任务（限时挑战）数据推测 | 数据模型 · 仅供内部参考 | 生成日期: 2026-05-26</p>
+
+  <!-- Top Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">📊 生命周期阶段</div>
+      <div class="stat-value">5</div>
+      <div class="stat-sub">新用户 → 成熟 → VIP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">💰 奖励总预算/人</div>
+      <div class="stat-value">$2,470</div>
+      <div class="stat-sub">全生命周期累计最高奖励</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">📈 平台收入/人</div>
+      <div class="stat-value">$12,750</div>
+      <div class="stat-sub">全生命周期预估交易手续费</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🎯 综合ROI</div>
+      <div class="stat-value" style="color: #10b981;">416%</div>
+      <div class="stat-sub">平台净收益 / 奖励总成本</div>
+    </div>
+  </div>
+
+  <!-- User Lifecycle Flow -->
+  <div class="section">
+    <div class="section-title">用户全生命周期流转</div>
+    <div class="lifecycle-flow">
+      <div class="lifecycle-step" style="border-color: rgba(59,130,246,0.4);">
+        <div class="icon">🌱</div>
+        <div class="name">Stage 1<br>新用户引入</div>
+        <div class="desc">注册 & KYC<br>首次充值</div>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step" style="border-color: rgba(6,182,212,0.4);">
+        <div class="icon">🌿</div>
+        <div class="name">Stage 2<br>激活转化</div>
+        <div class="desc">首次交易<br>体验合约产品</div>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step" style="border-color: rgba(16,185,129,0.4);">
+        <div class="icon">🪴</div>
+        <div class="name">Stage 3<br>成长进阶</div>
+        <div class="desc">稳定交易<br>提升交易量级</div>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step" style="border-color: rgba(245,158,11,0.4);">
+        <div class="icon">🌳</div>
+        <div class="name">Stage 4<br>成熟高价值</div>
+        <div class="desc">高频/大额交易<br>多产品线使用</div>
+      </div>
+      <div class="lifecycle-arrow">→</div>
+      <div class="lifecycle-step" style="border-color: rgba(139,92,246,0.4);">
+        <div class="icon">👑</div>
+        <div class="name">Stage 5<br>VIP/钻石</div>
+        <div class="desc">顶级交易量<br>专属服务+返佣</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tiered Reward Detail Table -->
+  <div class="section">
+    <div class="section-title">阶梯奖励明细表 (全生命周期)</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>阶段</th>
+              <th>用户层级</th>
+              <th>净充值条件<br>(USDT)</th>
+              <th>交易量条件<br>(USDT)</th>
+              <th>奖励类型</th>
+              <th>奖励价值<br>(USDT)</th>
+              <th>平台手续费<br>收入 (USDT)</th>
+              <th>单个用户<br>ROI</th>
+              <th>预计转化率</th>
+              <th>加权ROI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-blue">Stage 1</span></td>
+              <td>新用户<br><span class="text-sm text-muted">注册即送</span></td>
+              <td>≥ 50</td>
+              <td>≥ 500</td>
+              <td>新手体验金券</td>
+              <td style="font-weight:600">5</td>
+              <td>0.5</td>
+              <td class="roi-positive">-90%</td>
+              <td>60%</td>
+              <td class="roi-positive">-54%</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-cyan">Stage 2</span></td>
+              <td>激活用户<br><span class="text-sm text-muted">首充+首笔交易</span></td>
+              <td>≥ 100</td>
+              <td>≥ 3,000</td>
+              <td>10 USDT + 体验金</td>
+              <td style="font-weight:600">15</td>
+              <td>3.0</td>
+              <td class="roi-positive">-80%</td>
+              <td>45%</td>
+              <td class="roi-positive">-36%</td>
+            </tr>
+            <tr style="background: rgba(59,130,246,0.04);">
+              <td><span class="badge badge-green">Stage 3</span></td>
+              <td>成长用户 ⭐<br><span class="text-sm text-muted">图片中对应层级</span></td>
+              <td>≥ 300</td>
+              <td>≥ 10,000</td>
+              <td><strong>20 USDT</strong> + 合约体验金券</td>
+              <td style="font-weight:700;color:#60a5fa;">25</td>
+              <td>10.0</td>
+              <td class="roi-positive">-60%</td>
+              <td>30%</td>
+              <td class="roi-positive">-18%</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>成长用户 ⭐⭐</td>
+              <td>≥ 1,000</td>
+              <td>≥ 50,000</td>
+              <td>80 USDT</td>
+              <td style="font-weight:600">80</td>
+              <td>50.0</td>
+              <td class="roi-positive">-38%</td>
+              <td>22%</td>
+              <td class="roi-positive">-8%</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>成长用户 ⭐⭐⭐</td>
+              <td>≥ 3,000</td>
+              <td>≥ 200,000</td>
+              <td>200 USDT + 返佣卡</td>
+              <td style="font-weight:600">250</td>
+              <td>200.0</td>
+              <td class="roi-positive">-20%</td>
+              <td>15%</td>
+              <td class="roi-positive">-3%</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-orange">Stage 4</span></td>
+              <td>成熟用户 Lv.1</td>
+              <td>≥ 10,000</td>
+              <td>≥ 500,000</td>
+              <td>500 USDT + VIP体验</td>
+              <td style="font-weight:600">550</td>
+              <td>500.0</td>
+              <td class="roi-positive">-9%</td>
+              <td>10%</td>
+              <td class="roi-positive" style="color:#fbbf24;">-0.9%</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>成熟用户 Lv.2</td>
+              <td>≥ 30,000</td>
+              <td>≥ 1,500,000</td>
+              <td>800 USDT + 费率折扣</td>
+              <td style="font-weight:600">880</td>
+              <td>1,500.0</td>
+              <td class="roi-positive" style="color:#10b981;">+70%</td>
+              <td>6%</td>
+              <td class="roi-positive" style="color:#10b981;">+4.2%</td>
+            </tr>
+            <tr style="background: rgba(139,92,246,0.04);">
+              <td><span class="badge badge-purple">Stage 5</span></td>
+              <td>VIP用户</td>
+              <td>≥ 100,000</td>
+              <td>≥ 5,000,000</td>
+              <td>1,500 USDT + 专属服务</td>
+              <td style="font-weight:700;color:#a78bfa;">2,000</td>
+              <td>5,000.0</td>
+              <td class="roi-super">+150%</td>
+              <td>3%</td>
+              <td class="roi-positive" style="color:#10b981;">+4.5%</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>钻石用户</td>
+              <td>≥ 500,000</td>
+              <td>≥ 20,000,000</td>
+              <td>5,000 USDT + 返佣+专属</td>
+              <td style="font-weight:700;color:#c4b5fd;">6,000</td>
+              <td>20,000.0</td>
+              <td class="roi-super">+233%</td>
+              <td>1%</td>
+              <td class="roi-positive" style="color:#10b981;">+2.3%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="section">
+    <div class="section-title">数据可视化</div>
+    <div class="cards-2">
+      <!-- Chart 1: ROI by Stage -->
+      <div class="card">
+        <h3>各阶段单用户ROI对比 (%)</h3>
+        <div class="chart-box">
+          <canvas id="chartROI"></canvas>
+        </div>
+      </div>
+      <!-- Chart 2: Cumulative Revenue vs Cost -->
+      <div class="card">
+        <h3>平台收入 vs 奖励成本 (累计, USDT)</h3>
+        <div class="chart-box">
+          <canvas id="chartCumulative"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Charts Row -->
+  <div class="section">
+    <div class="cards-2">
+      <!-- Chart 3: Funnel -->
+      <div class="card">
+        <h3>用户转化漏斗 (每10,000新用户)</h3>
+        <div class="chart-box">
+          <canvas id="chartFunnel"></canvas>
+        </div>
+      </div>
+      <!-- Chart 4: Revenue Breakdown -->
+      <div class="card">
+        <h3>各阶段平台收入贡献占比</h3>
+        <div class="chart-box">
+          <canvas id="chartRevenue"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Third Charts Row -->
+  <div class="section">
+    <div class="cards-2">
+      <!-- Chart 5: Trade Volume vs Reward -->
+      <div class="card">
+        <h3>交易量 vs 奖励金额 关系图</h3>
+        <div class="chart-box">
+          <canvas id="chartScatter"></canvas>
+        </div>
+      </div>
+      <!-- Chart 6: Step ROI Waterfall -->
+      <div class="card">
+        <h3>阶梯ROI瀑布图 (单用户)</h3>
+        <div class="chart-box">
+          <canvas id="chartWaterfall"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Lifecycle Economics Summary -->
+  <div class="section">
+    <div class="section-title">全生命周期经济学汇总</div>
+    <div class="cards-3">
+      <div class="card">
+        <h3>📥 获客成本 (CAC)</h3>
+        <div style="font-size: 24px; font-weight: 700; color: #60a5fa;">$5.00</div>
+        <div class="text-sm text-muted">Stage 1 加权奖励成本 / 转化新用户</div>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+          <div class="text-sm" style="display:flex;justify-content:space-between;"><span>注册用户</span><span>10,000</span></div>
+          <div class="text-sm" style="display:flex;justify-content:space-between;"><span>完成KYC</span><span>6,000 (60%)</span></div>
+          <div class="text-sm" style="display:flex;justify-content:space-between;"><span>首充用户</span><span>4,500 (45%)</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>💎 用户终身价值 (LTV)</h3>
+        <div style="font-size: 24px; font-weight: 700; color: #34d399;">$204.58</div>
+        <div class="text-sm text-muted">全生命周期加权平台净收入 / 注册用户</div>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+          <div class="text-sm" style="display:flex;justify-content:space-between;"><span>总收入 / 注册用户</span><span>$270.80</span></div>
+          <div class="text-sm" style="display:flex;justify-content:space-between;"><span>总奖励成本 / 注册用户</span><span>$66.22</span></div>
+          <div class="text-sm" style="display:flex;justify-content:space-between;font-weight:600;"><span>LTV / CAC</span><span style="color:#34d399;">40.9x</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🎯 关键指标</h3>
+        <div style="margin-top: 4px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span class="text-sm text-muted">综合ROI</span>
+            <span style="font-weight:700;color:#10b981;">416%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span class="text-sm text-muted">盈亏平衡点</span>
+            <span style="font-weight:600;">Stage 4 Lv.2</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span class="text-sm text-muted">最高ROI阶段</span>
+            <span style="font-weight:600;color:#a78bfa;">钻石用户 (233%)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span class="text-sm text-muted">补贴阶段数</span>
+            <span>前6层 (< Stage 4 Lv.2)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span class="text-sm text-muted">盈利阶段数</span>
+            <span style="color:#10b981;">后3层 (≥ Stage 4 Lv.2)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Assumptions -->
+  <div class="note">
+    <strong>📐 模型假设与说明：</strong><br>
+    ① 手续费率：现货 0.1% / 合约 0.05% (maker+taker综合);
+    ② 交易量按净充值倍数估算 (Stage 1-2: 5-10x, Stage 3: 30x, Stage 4: 50x, Stage 5: 50-100x);<br>
+    ③ 图片数据对应 Stage 3 (净充值≥$300 + 交易量≥$10,000 → $20 USDT奖励)，奖励/交易量 = 0.2%，属于获客补贴阶段；<br>
+    ④ 转化率为预估漏斗留存，可根据XT实际数据校准；<br>
+    ⑤ <strong style="color:#fbbf24;">盈亏平衡点在 Stage 4 Lv.2</strong>（成熟用户Lv.2），在此之前平台处于投资获客阶段，在此之后进入盈利期；<br>
+    ⑥ 钻石用户贡献了最高的单用户ROI (233%)，虽然数量少但价值极高，<strong style="color:#a78bfa;">建议重点运营高价值用户升级路径</strong>。
+  </div>
+
+</div>
+
+<script>
+// Color palette
+const colors = {
+  blue: '#3b82f6', cyan: '#06b6d4', green: '#10b981',
+  orange: '#f59e0b', purple: '#8b5cf6', red: '#ef4444',
+  blueLight: 'rgba(59,130,246,0.2)',
+  greenLight: 'rgba(16,185,129,0.2)',
+};
+
+// Chart defaults
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(30,41,59,0.5)';
+Chart.defaults.font.family = "-apple-system, 'PingFang SC', sans-serif";
+
+// 1. ROI by Stage Bar Chart
+new Chart(document.getElementById('chartROI'), {
+  type: 'bar',
+  data: {
+    labels: ['S1\n新用户','S2\n激活','S3⭐\n成长','S3⭐⭐\n成长','S3⭐⭐⭐\n成长','S4 Lv1\n成熟','S4 Lv2\n成熟','VIP','钻石'],
+    datasets: [{
+      label: '单用户ROI (%)',
+      data: [-90, -80, -60, -38, -20, -9, 70, 150, 233],
+      backgroundColor: [
+        'rgba(59,130,246,0.7)','rgba(6,182,212,0.7)','rgba(16,185,129,0.7)',
+        'rgba(16,185,129,0.7)','rgba(16,185,129,0.7)','rgba(245,158,11,0.7)',
+        'rgba(245,158,11,0.7)','rgba(139,92,246,0.7)','rgba(139,92,246,0.7)',
+      ],
+      borderColor: [
+        '#3b82f6','#06b6d4','#10b981','#10b981','#10b981',
+        '#f59e0b','#f59e0b','#8b5cf6','#8b5cf6',
+      ],
+      borderWidth: 1,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => `ROI: ${ctx.raw}%` } }
+    },
+    scales: {
+      y: {
+        ticks: { callback: v => v + '%' },
+        grid: { color: 'rgba(30,41,59,0.4)' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 2. Cumulative Revenue vs Cost
+new Chart(document.getElementById('chartCumulative'), {
+  type: 'line',
+  data: {
+    labels: ['S1','S2','S3⭐','S3⭐⭐','S3⭐⭐⭐','S4 Lv1','S4 Lv2','VIP','钻石'],
+    datasets: [
+      {
+        label: '累计平台收入',
+        data: [0.5, 3.5, 13.5, 63.5, 263.5, 763.5, 2263.5, 7263.5, 27263.5],
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16,185,129,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#10b981',
+      },
+      {
+        label: '累计奖励成本',
+        data: [5, 20, 45, 125, 375, 925, 1805, 3805, 9805],
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#ef4444',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.raw.toLocaleString()}` } }
+    },
+    scales: {
+      y: {
+        type: 'logarithmic',
+        ticks: { callback: v => '$' + v.toLocaleString() },
+        grid: { color: 'rgba(30,41,59,0.4)' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 3. Funnel Chart
+new Chart(document.getElementById('chartFunnel'), {
+  type: 'bar',
+  data: {
+    labels: ['注册','KYC','首充','首笔交易','成长\n(≥$10k)','成熟\n(≥$500k)','VIP\n(≥$5M)','钻石\n(≥$20M)'],
+    datasets: [{
+      label: '用户数',
+      data: [10000, 6000, 4500, 3350, 1005, 201, 30, 3],
+      backgroundColor: [
+        'rgba(59,130,246,0.7)','rgba(59,130,246,0.6)','rgba(6,182,212,0.6)',
+        'rgba(16,185,129,0.6)','rgba(16,185,129,0.7)','rgba(245,158,11,0.7)',
+        'rgba(139,92,246,0.7)','rgba(139,92,246,0.9)',
+      ],
+      borderColor: ['#3b82f6','#3b82f6','#06b6d4','#10b981','#10b981','#f59e0b','#8b5cf6','#8b5cf6'],
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => `${ctx.raw.toLocaleString()} 人` } }
+    },
+    scales: {
+      x: {
+        ticks: { callback: v => v.toLocaleString() },
+        grid: { color: 'rgba(30,41,59,0.4)' }
+      },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 4. Revenue Contribution Pie
+new Chart(document.getElementById('chartRevenue'), {
+  type: 'doughnut',
+  data: {
+    labels: ['S1 新用户', 'S2 激活', 'S3 成长', 'S4 成熟', 'S5 VIP/钻石'],
+    datasets: [{
+      data: [0.02, 0.1, 0.5, 18.5, 80.9],
+      backgroundColor: [
+        'rgba(59,130,246,0.7)','rgba(6,182,212,0.7)','rgba(16,185,129,0.7)',
+        'rgba(245,158,11,0.7)','rgba(139,92,246,0.7)',
+      ],
+      borderColor: '#111827',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw}%` } }
+    }
+  }
+});
+
+// 5. Trade Volume vs Reward Scatter
+new Chart(document.getElementById('chartScatter'), {
+  type: 'scatter',
+  data: {
+    datasets: [{
+      label: '各阶梯数据点',
+      data: [
+        {x: 500, y: 5}, {x: 3000, y: 15}, {x: 10000, y: 25},
+        {x: 50000, y: 80}, {x: 200000, y: 250}, {x: 500000, y: 550},
+        {x: 1500000, y: 880}, {x: 5000000, y: 2000}, {x: 20000000, y: 6000},
+      ],
+      backgroundColor: [
+        '#3b82f6','#06b6d4','#10b981','#10b981','#10b981',
+        '#f59e0b','#f59e0b','#8b5cf6','#8b5cf6',
+      ],
+      borderColor: [
+        '#3b82f6','#06b6d4','#10b981','#10b981','#10b981',
+        '#f59e0b','#f59e0b','#8b5cf6','#8b5cf6',
+      ],
+      pointRadius: 8,
+      pointHoverRadius: 12,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'logarithmic',
+        title: { display: true, text: '交易量 (USDT)' },
+        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v },
+        grid: { color: 'rgba(30,41,59,0.4)' }
+      },
+      y: {
+        type: 'logarithmic',
+        title: { display: true, text: '奖励金额 (USDT)' },
+        ticks: { callback: v => '$'+v },
+        grid: { color: 'rgba(30,41,59,0.4)' }
+      }
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: ctx => `交易量: $${ctx.raw.x.toLocaleString()} → 奖励: $${ctx.raw.y}`
+        }
+      }
+    }
+  }
+});
+
+// 6. Waterfall Chart (ROI per stage)
+new Chart(document.getElementById('chartWaterfall'), {
+  type: 'bar',
+  data: {
+    labels: ['S1','S2','S3⭐','S3⭐⭐','S3⭐⭐⭐','S4 Lv1','S4 Lv2','VIP','钻石'],
+    datasets: [
+      {
+        label: '平台收入',
+        data: [0.5, 3.0, 10, 50, 200, 500, 1500, 5000, 20000],
+        backgroundColor: 'rgba(16,185,129,0.7)',
+        borderColor: '#10b981',
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+      {
+        label: '奖励成本',
+        data: [-5, -15, -25, -80, -250, -550, -880, -2000, -6000],
+        backgroundColor: 'rgba(239,68,68,0.7)',
+        borderColor: '#ef4444',
+        borderWidth: 1,
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${Math.abs(ctx.raw).toLocaleString()}` } }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: {
+        stacked: true,
+        title: { display: true, text: '净收益 (USDT)' },
+        ticks: { callback: v => '$' + v.toLocaleString() },
+        grid: { color: 'rgba(30,41,59,0.4)' }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

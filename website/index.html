@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Agent — AI 简历助手</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #ffffff;
+  --fg: #141413;
+  --fg-secondary: #3a3a35;
+  --fg-muted: #8a8983;
+  --accent: #d94f1a;
+  --accent-light: #fff6f2;
+  --border: #e8e6dc;
+  --stripe: #faf9f5;
+  --dark: #1a1918;
+}
+
+body {
+  font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #fff;
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* Nav */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+nav .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+nav .logo span { color: var(--accent); }
+nav a { font-size: 13px; color: var(--fg-muted); text-decoration: none; margin-left: 24px; font-weight: 500; }
+nav a:hover { color: var(--fg); }
+
+/* Hero */
+.hero {
+  text-align: center; padding: 80px 32px 64px;
+  max-width: 720px; margin: 0 auto;
+}
+.hero .badge {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 3px;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 24px;
+}
+.hero h1 { font-size: 48px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.15; }
+.hero h1 .accent { color: var(--accent); }
+.hero p { font-size: 18px; color: var(--fg-muted); margin-top: 20px; line-height: 1.6; }
+
+/* Install bar */
+.install {
+  background: var(--dark); color: #fff; border-radius: 14px;
+  padding: 20px 28px; margin: 0 auto 64px;
+  max-width: 600px; font-size: 14px; font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.install .cmd { color: var(--accent); }
+.install .comment { color: rgba(255,255,255,0.4); }
+
+/* Sections */
+section { max-width: 860px; margin: 0 auto 80px; padding: 0 32px; }
+section h2 {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+section h2 .accent { color: var(--accent); }
+section .intro { font-size: 15px; color: var(--fg-muted); margin-bottom: 36px; line-height: 1.5; }
+section h3 { font-size: 19px; font-weight: 700; margin: 32px 0 10px; }
+
+/* Feature grid */
+.feature-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin: 24px 0;
+}
+.feature-card {
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px 24px;
+}
+.feature-card .num {
+  font-size: 24px; font-weight: 900; color: var(--accent);
+  margin-bottom: 6px;
+}
+.feature-card .title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.feature-card .desc { font-size: 13px; color: var(--fg-muted); line-height: 1.45; }
+
+/* Step list */
+.step-list { margin: 24px 0; }
+.step-item {
+  display: flex; gap: 20px; align-items: flex-start;
+  padding: 18px 0; border-bottom: 1px solid var(--border);
+}
+.step-item:last-child { border-bottom: none; }
+.step-badge {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; flex-shrink: 0;
+  background: var(--fg); color: #fff;
+}
+.step-badge.accent { background: var(--accent); }
+.step-info { flex: 1; }
+.step-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.step-info p { font-size: 13px; color: var(--fg-muted); margin: 0; line-height: 1.5; }
+.step-info ul { margin: 6px 0 0 16px; }
+.step-info ul li { font-size: 13px; color: var(--fg-muted); line-height: 1.5; }
+
+/* Info box */
+.info-box {
+  background: var(--stripe);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 18px 24px; margin: 24px 0;
+}
+.info-box .info-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+.info-box p { font-size: 14px; color: var(--fg-secondary); line-height: 1.5; margin: 0; }
+
+/* Dark box */
+.dark-box {
+  background: var(--dark); border-radius: 14px;
+  padding: 24px 30px; margin: 24px 0; text-align: center;
+}
+.dark-box p { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.5; margin: 0; }
+.dark-box p .accent { color: var(--accent); }
+
+/* Table */
+.table-wrap { overflow-x: auto; margin: 24px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th {
+  text-align: left; padding: 12px 14px;
+  font-weight: 700; font-size: 12px; letter-spacing: 1px;
+  color: var(--fg-muted); text-transform: uppercase;
+  border-bottom: 2px solid var(--border);
+}
+td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--fg-secondary); }
+tr:last-child td { border-bottom: none; }
+td:first-child, th:first-child { font-weight: 600; color: var(--fg); }
+
+/* Code block */
+code, pre {
+  font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+  font-size: 13px; line-height: 1.6;
+}
+pre {
+  background: var(--stripe);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 24px; overflow-x: auto;
+  white-space: pre-wrap;
+  color: var(--fg-secondary);
+}
+
+/* Flow */
+.flow {
+  display: flex; align-items: center; gap: 0; margin: 24px 0;
+  flex-wrap: wrap; justify-content: center;
+}
+.flow-step {
+  background: var(--stripe); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 16px;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.flow-arrow { font-size: 16px; color: var(--fg-muted); padding: 0 8px; font-weight: 700; }
+
+/* Template block */
+.template-block {
+  border-left: 3px solid var(--accent);
+  padding: 16px 24px; margin: 16px 0;
+  font-size: 14px; color: var(--fg-secondary);
+  line-height: 1.7;
+}
+.template-block .var { color: var(--accent); font-weight: 600; }
+
+/* Footer */
+footer {
+  text-align: center; padding: 48px 32px;
+  font-size: 13px; color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .hero h1 { font-size: 32px; }
+  .feature-grid { grid-template-columns: 1fr; }
+  nav a { display: none; }
+  section { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">📄 Resume <span>Agent</span></div>
+  <div>
+    <a href="#features">功能</a>
+    <a href="#workflow">工作流</a>
+    <a href="#scoring">打分</a>
+    <a href="#scraping">岗位抓取</a>
+    <a href="#interview">面试</a>
+  </div>
+</nav>
+
+<!-- ════════════ HERO ════════════ -->
+<div class="hero">
+  <div class="badge">Open Source · CLI Tool</div>
+  <h1>从<span class="accent">"问AI"</span>到<br><span class="accent">"让AI投"</span></h1>
+  <p>AI 驱动的简历助手 — 匹配打分、生成、定制、翻译、岗位抓取、模拟面试，全流程闭环。</p>
+</div>
+
+<div class="install">
+  <span class="comment"># 安装</span><br>
+  <span class="cmd">cd</span> ~/Desktop/resume-agent<br>
+  <span class="cmd">pip install</span> -r requirements.txt<br>
+  <span class="cmd">cp</span> .env.example .env &nbsp;<span class="comment"># 填入 ANTHROPIC_API_KEY</span><br>
+  <span class="cmd">python</span> main.py
+</div>
+
+<!-- ════════════ FEATURES ════════════ -->
+<section id="features">
+  <h2>功能<span class="accent">模块</span></h2>
+  <p class="intro">8 个功能模块，覆盖简历全生命周期。</p>
+  <div class="feature-grid">
+    <div class="feature-card"><div class="num">01</div><div class="title">生成简历</div><div class="desc">交互式填写信息，AI 生成完整简历，自动保存 .md + .pdf</div></div>
+    <div class="feature-card"><div class="num">02</div><div class="title">优化简历</div><div class="desc">上传已有简历，AI 分析问题并提供润色建议</div></div>
+    <div class="feature-card"><div class="num">03</div><div class="title">匹配打分</div><div class="desc">粘贴 JD，按 6 维度 10 分制对所有版本打分排名</div></div>
+    <div class="feature-card"><div class="num">04</div><div class="title">定制简历</div><div class="desc">基于 JD + 最佳版本，AI 生成针对性简历，自动存 PDF</div></div>
+    <div class="feature-card"><div class="num">05</div><div class="title">翻译简历</div><div class="desc">中英文互译，支持文件输入或直接粘贴</div></div>
+    <div class="feature-card"><div class="num">06</div><div class="title">项目管理</div><div class="desc">录入/同步项目经验，供定制和优化时自动引用</div></div>
+    <div class="feature-card"><div class="num">07</div><div class="title">投递管理</div><div class="desc">全生命周期追踪投递、面试、反馈，End-of-Day 回顾</div></div>
+    <div class="feature-card"><div class="num">08</div><div class="title">岗位抓取</div><div class="desc">搜 LinkedIn / Wellfound / MCF，AI 翻译 JD 入池</div></div>
+  </div>
+</section>
+
+<!-- ════════════ WORKFLOW ════════════ -->
+<section id="workflow">
+  <h2>标准<span class="accent">工作流</span></h2>
+  <p class="intro">收到 JD 后的完整操作链路。</p>
+
+  <div class="step-list">
+    <div class="step-item">
+      <div class="step-badge">0</div>
+      <div class="step-info"><h4>检查 STAR 项目经历</h4><p>确认 docs/ 下有对应公司的 STAR 拆解文档，无则提醒准备。准备好后放 NotebookLM 作为面试知识库。</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge accent">1</div>
+      <div class="step-info"><h4>匹配打分</h4><p>粘贴 JD → 扫描简历/下所有版本 → 按 6 维度打分 → 展示排名 + 推荐最佳版本</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge accent">2</div>
+      <div class="step-info"><h4>定制简历</h4><p>基于最佳版本 + JD 定制，自动保存 .md + .pdf 到投递岗位&定制化简历/</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge">3</div>
+      <div class="step-info"><h4>加入投递清单</h4><p>记录公司、职位、渠道、简历版本（PDF 路径）、匹配分到 data/applications.json</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge">4</div>
+      <div class="step-info"><h4>岗位抓取</h4><p>选 8 → 选平台 → 输入关键词，AI 翻译 JD 后批量入池</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge accent">5</div>
+      <div class="step-info"><h4>模拟面试</h4><p>按 JD 权重出题 → 打分 + 追问 + 参考答案 → 暴露弱项 → 针对性补救</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge">6</div>
+      <div class="step-info"><h4>日历同步</h4><p>收到面试后同步到 macOS「工作」日历，含公司名、岗位、时间</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-badge">9</div>
+      <div class="step-info"><h4>每日回顾</h4><p>今日投递清单 + 累计数据 + 渠道策略优化建议</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SCORING ════════════ -->
+<section id="scoring">
+  <h2>匹配<span class="accent">打分标准</span></h2>
+  <p class="intro">6 维度 / 10 分制，低于 5 分明确不投递。</p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>维度</th><th>分值</th><th>评分逻辑</th></tr>
+      <tr><td>行业匹配</td><td>0-2</td><td>同行业=2，可迁移相邻行业=1，完全不同=0</td></tr>
+      <tr><td>职能匹配</td><td>0-2</td><td>核心职责覆盖 70%+=2，30-70%=1，无法覆盖=0</td></tr>
+      <tr><td>硬性门槛</td><td>0-1</td><td>学历/执照/特定年限等硬要求全部满足=1，有一条不满足=0</td></tr>
+      <tr><td>经验年限</td><td>0-1</td><td>JD 要求年限 ≤ 实际经验=1，差距 > 3年=0</td></tr>
+      <tr><td>语言/区域</td><td>0-2</td><td>完全匹配=2，部分匹配=1，关键语言不满足=0</td></tr>
+      <tr><td>技能/工具</td><td>0-2</td><td>所列技能 70%+满足=2，30-70%=1，核心技能缺失=0</td></tr>
+    </table>
+  </div>
+
+  <div class="dark-box">
+    <p>8-10 <span class="accent">优先投递</span> &nbsp;|&nbsp; 6-7 可投 &nbsp;|&nbsp; 5 边缘 &nbsp;|&nbsp; <span class="accent">< 5 不投</span></p>
+  </div>
+</section>
+
+<!-- ════════════ STRUCTURE ════════════ -->
+<section>
+  <h2>项目<span class="accent">结构</span></h2>
+<pre>resume-agent/
+├── main.py                      # CLI 入口
+├── agent/                       # 功能模块
+│   ├── generator.py             # 生成简历 → 自动保存 .md + .pdf
+│   ├── customizer.py            # 定制简历 → 自动保存 .md + .pdf
+│   ├── matcher.py               # 6维度匹配打分 + 排名
+│   ├── optimizer.py             # 优化润色已有简历
+│   ├── translator.py            # 中英文互译
+│   ├── linkedin_jobs.py         # LinkedIn 岗位抓取
+│   ├── wellfound_jobs.py        # Wellfound 岗位抓取
+│   ├── mycareersfuture_jobs.py  # MyCareersFuture 抓取
+│   ├── job_scraper_menu.py      # 岗位抓取统一菜单
+│   ├── daily_job_scanner.py     # 每日自动扫描
+│   ├── project_experience.py    # 项目经历 CRUD
+│   └── applicant_tracker.py     # 投递 + 面试 + 反馈管理
+├── prompts/                     # Claude 系统提示词
+├── utils/                       # 简历解析、格式化、Notion 同步
+├── data/                        # JSON 数据存储
+├── 简历/                        # 各版本简历
+├── 投递岗位&定制化简历/         # 定制输出
+└── 简历.md                      # 简历模板 + 完整规范</pre>
+</section>
+
+<!-- ════════════ JOB SCRAPING ════════════ -->
+<section id="scraping">
+  <h2>岗位<span class="accent">抓取</span></h2>
+  <p class="intro">3 个渠道，DuckDuckGo 搜索 + Claude 翻译解析。</p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>平台</th><th>抓取方式</th><th>说明</th></tr>
+      <tr><td>LinkedIn (领英)</td><td><code>site:linkedin.com/jobs/view</code></td><td>全球岗位，关键词搜索</td></tr>
+      <tr><td>Wellfound (AngelList)</td><td><code>site:wellfound.com/jobs</code></td><td>初创/远程岗位，过去一周</td></tr>
+      <tr><td>MyCareersFuture</td><td><code>site:mycareersfuture.gov.sg</code></td><td>新加坡政府平台，过去一月</td></tr>
+    </table>
+  </div>
+
+  <h3>流程</h3>
+  <div class="flow">
+    <span class="flow-step">选 8</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">选平台</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">关键词</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">DDG 搜索</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Claude 解析</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">表格展示</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">勾选入池</span>
+  </div>
+</section>
+
+<!-- ════════════ INTERVIEW ════════════ -->
+<section id="interview">
+  <h2>面试<span class="accent">准备</span></h2>
+  <p class="intro">定制简历完成即可启动模拟面试，不等到面试邀请。</p>
+
+  <div class="flow">
+    <span class="flow-step">面试邀请</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">日历同步</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">收集材料</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">模拟面试</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">正式面试</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">复盘记录</span>
+  </div>
+
+  <h3>模拟面试出题框架</h3>
+  <p>按 JD 五大领域分配权重，每轮 2-3 道复合场景题。全部用场景和冲突包装，追问瞄准首答薄弱部分，参考答案必须有可操作的具体方案。</p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>材料</th><th>权重</th><th>来源</th></tr>
+      <tr><td>核心项目 STAR</td><td>~50%</td><td>对应 JD 第 1-2 条，必考</td></tr>
+      <tr><td>转化项目 STAR</td><td>~30%</td><td>对应 JD 第 1、3 条</td></tr>
+      <tr><td>其他相关经验</td><td>~20%</td><td>对应 JD 第 4-5 条</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════ SELF-INTRO ════════════ -->
+<section>
+  <h2>面试<span class="accent">自我介绍</span>模板</h2>
+  <p class="intro">结构：行业经验 → 核心项目 1 → 核心项目 2 → 数据方法论 → 跨部门 → 与目标公司契合点。260 字以内。</p>
+
+  <div class="template-block">
+    近<span class="var">{{YEARS}}</span>年聚焦<span class="var">{{DOMAIN}}</span>增长运营。<span class="var">{{COMPANY_A}}</span>期间搭建了<span class="var">{{SYSTEM_NAME}}</span>——<span class="var">{{METRIC_1}}</span>梳理成<span class="var">{{RESULT_1}}</span>，覆盖<span class="var">{{CHANNEL_LIST}}</span>渠道，设计<span class="var">{{CAPABILITY_1}}</span>和<span class="var">{{CAPABILITY_2}}</span>，<span class="var">{{ROLE}}</span>自助配置率从<span class="var">{{FROM}}</span>拉到<span class="var">{{TO}}</span>以上。<span class="var">{{COMPANY_B}}</span>期间搭建「<span class="var">{{FUNNEL}}</span>」增长闭环，累计<span class="var">{{USER_COUNT}}</span>注册用户，CAC 控制在<span class="var">{{CAC}}</span>。数据决策上<span class="var">{{DATA_METHOD}}</span>，EDM 按<span class="var">{{SEGMENT_METHOD}}</span>成本降<span class="var">{{COST_DROP}}</span>以上。跨部门推进中台化时用<span class="var">{{CHANGE_METHOD}}</span>给对方控制感，最终<span class="var">{{RESULT_CROSS_TEAM}}</span>。贵司现在<span class="var">{{TARGET_SITUATION}}</span>，和我<span class="var">{{COMPANY_A}}</span>的起点高度重合。
+  </div>
+
+  <div class="info-box">
+    <div class="info-label">关键原则</div>
+    <p>自我介绍中的每个数字/表述，必须有对应的 STAR 文档支撑。面试前按数据来源对照表逐条核对。</p>
+  </div>
+</section>
+
+<!-- ════════════ QUESTIONS ════════════ -->
+<section>
+  <h2>反问面试官<span class="accent">问题库</span></h2>
+
+  <h3>好问题</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>类别</th><th>问题</th></tr>
+      <tr><td>角色与团队</td><td>这个岗位是新建的还是替换？团队现在规模和分工？</td></tr>
+      <tr><td>现状与挑战</td><td>各业务线 Push 是各自直发还是已有统一规则？EDM 月均成本？</td></tr>
+      <tr><td>跨部门</td><td>推动中台化阻力最大的业务线是哪条？产研排期有预留吗？</td></tr>
+      <tr><td>文化与节奏</td><td>决策靠数据驱动 AB 测试，还是靠经验直觉？</td></tr>
+    </table>
+  </div>
+
+  <h3>避免问</h3>
+  <ul style="margin: 12px 0 0 20px; font-size: 14px; color: var(--fg-muted);">
+    <li>薪资福利（留 HR）</li>
+    <li>融资/盈利（敏感）</li>
+    <li>「公司文化怎么样」（太虚）</li>
+    <li>JD 已写清楚的事</li>
+  </ul>
+</section>
+
+<footer>
+  Resume Agent · Open Source · Built with Claude Code
+</footer>
+
+</body>
+</html>
