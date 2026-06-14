@@ -1,17 +1,36 @@
+# Environment
 .env
+
+# Python
 __pycache__/
 *.pyc
-node_modules/
-.DS_Store
+*.egg-info/
+venv/
+.venv/
+
+# Data - personal application records
 data/applications.json
 data/interviews.json
 data/projects.json
 data/resume_feedback.json
 data/daily_jobs.json
 data/daily_scan.log
+
+# Outputs
 *.pdf
-.claude/
 *.db
 *.db-shm
 *.db-wal
 *.doc
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Claude Code
+.claude/
+
+# Node
+node_modules/
+dist/

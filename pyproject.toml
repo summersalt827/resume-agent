@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resume-agent"
+version = "0.1.0"
+description = "AI-powered resume assistant CLI - generate, optimize, customize, and translate resumes"
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+    "fpdf2>=2.7.0",
+    "pymupdf>=1.24.0",
+    "notion-client>=3.0.0",
+    "ddgs>=6.0.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+resume-agent = "main:main"
+
+[project.urls]
+Repository = "https://github.com/summersalt827/resume-agent"
+
+[tool.setuptools]
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+include = ["agent*", "utils*", "prompts*", "scripts*"]
