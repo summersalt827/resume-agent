@@ -28,8 +28,8 @@ data/daily_scan.log
 .vscode/
 .DS_Store
 
-# Claude Code
-.claude/
+# Claude Code (keep skills, ignore local settings)
+.claude/settings*.json
 
 # Node
 node_modules/

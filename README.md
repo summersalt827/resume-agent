@@ -5,11 +5,19 @@ AI-powered resume assistant — match scoring, generation, customization, transl
 ## Quick Start
 
 ```bash
-cd ~/Desktop/resume-agent
-pip install -r requirements.txt
-cp .env.example .env
+# Install from GitHub
+pip install git+https://github.com/summersalt827/resume-agent.git
+
+# Or clone and install locally
+git clone https://github.com/summersalt827/resume-agent.git
+cd resume-agent
+pip install -e .
+
 # Add your ANTHROPIC_API_KEY to .env
-python main.py
+echo 'ANTHROPIC_API_KEY=sk-ant-...' > .env
+
+# Launch
+resume-agent
 ```
 
 ## Features
