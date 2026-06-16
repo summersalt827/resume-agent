@@ -49,6 +49,15 @@ website/              # Landing page
 - Notion sync is optional — features work without it
 - Job scrapers push results into the applicant tracker flow
 
+## Resume generation rules (CRITICAL)
+
+**Always follow this workflow when customizing a resume:**
+1. Read `简历.md` to confirm the template structure
+2. Generate the MD file following the template EXACTLY — 4 companies, strategy + 3 bullets + Case, Education, Skills
+3. Show MD to user for review
+4. Only after MD is confirmed, use `utils/resume_formatter.save_pdf()` to generate PDF
+5. NEVER skip MD and go directly to PDF
+
 ## Common tasks
 
 - **Add a new feature**: Create `agent/feature.py` with a `run_feature()` entry, add menu item in `main.py`
