@@ -55,7 +55,11 @@ website/              # Landing page
 1. Read `简历.md` to confirm the template structure
 2. Generate the MD file following the template EXACTLY — 4 companies, strategy + 3 bullets + Case, Education, Skills
 3. Show MD to user for review
-4. Only after MD is confirmed, use `utils/resume_formatter.save_pdf()` to generate PDF
+4. Only after MD is confirmed, generate PDF via: `markdown` → styled HTML → Chrome headless `--print-to-pdf`
+   - Use Python `markdown` library with `extra` extension to convert MD → HTML
+   - Wrap in styled HTML with PingFang SC font, 11px, proper margins
+   - Run: `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --print-to-pdf=<output.pdf> file://<temp.html>`
+   - Do NOT use `utils/resume_formatter.save_pdf()` — it dumps raw markdown text without rendering
 5. NEVER skip MD and go directly to PDF
 
 ## Common tasks
